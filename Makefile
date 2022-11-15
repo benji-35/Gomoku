@@ -5,7 +5,7 @@
 ## Makefile
 ##
 
-BIN_NAME=	toto
+BIN_NAME	=	pbrain-gomoku-ai
 
 include src/Utils/Makefile
 
@@ -20,5 +20,5 @@ clean:
 re: clean all
 
 $(BIN_NAME):	$(OBJ_SRC)
-	g++ -o $(BIN_NAME) $(OBJ_SRC) $(INCLUDES) $(LIBS)
+	@g++ -o $(BIN_NAME) $(OBJ_SRC) $(INCLUDES) $(LIBS)
 
