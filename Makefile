@@ -5,8 +5,20 @@
 ## Makefile
 ##
 
-all:
+BIN_NAME=	toto
+
+include src/Utils/Makefile
+
+.PHONY: all fclean clean re
+
+all:	$(BIN_NAME)
 
 fclean:
 
 clean:
+
+re: clean all
+
+$(BIN_NAME):	$(OBJ_SRC)
+	g++ -o $(BIN_NAME) $(OBJ_SRC) $(INCLUDES) $(LIBS)
+

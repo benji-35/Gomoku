@@ -5,6 +5,10 @@
 ** Main
 */
 
-int main() {
+#include "Gomoku.hpp"
 
+int main() {
+    Gomoku::Game game;
+
+    game.start();
 }
