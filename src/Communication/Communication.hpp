@@ -10,6 +10,8 @@ namespace Gomoku {
         public:
             Communication();
             ~Communication();
+
+            void listen();
     };
 }
 
