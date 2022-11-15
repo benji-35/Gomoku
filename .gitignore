@@ -33,3 +33,7 @@
 
 # KapEngine
 *.kedat
+*.kProf
+*.kprof
+*.kaprof
+*.kaProf
