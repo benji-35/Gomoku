@@ -31,9 +31,6 @@
 *.out
 *.app
 
-# KapEngine
-*.kedat
-*.kProf
-*.kprof
-*.kaprof
-*.kaProf
+*pbrain-gomoku-ai
+*.vs*
+*.idea

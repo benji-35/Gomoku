@@ -9,8 +9,10 @@
 #define GAME_HPP_
 
 #include <memory>
-#include <iostream>
-#include "Gomoku.hpp"
+#include <vector>
+
+#include "AbstractIA.hpp"
+#include "Communication.hpp"
 
 namespace Gomoku {
     class Game {
@@ -22,9 +24,25 @@ namespace Gomoku {
 
             void start();
 
+            void setBoardSize(std::size_t boardSize) {
+                _boardSize=  boardSize;
+            }
+
+            void setIA(std::shared_ptr<AbstractIA> ia) {
+                _ia = ia;
+            }
+
+            std::shared_ptr<AbstractIA> getIA() const {
+                return _ia;
+            }
+
         protected:
         private:
             std::shared_ptr<Communication> _com;
+            std::shared_ptr<AbstractIA> _ia;
+            std::vector<std::string> _board;
+            std::size_t _boardSize;
+            bool _running = false;
     };
 }
 

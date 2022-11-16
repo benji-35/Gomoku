@@ -7,4 +7,5 @@
 
 #include "Game.hpp"
 
-void Gomoku::Game::start() {}
+void Gomoku::Game::start() {
+}
