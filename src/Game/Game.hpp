@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "AbstractIA.hpp"
-#include "Communication.hpp"
 
 namespace Gomoku {
     class Game {
@@ -38,7 +37,6 @@ namespace Gomoku {
 
         protected:
         private:
-            std::shared_ptr<Communication> _com;
             std::shared_ptr<AbstractIA> _ia;
             std::vector<std::string> _board;
             std::size_t _boardSize;
