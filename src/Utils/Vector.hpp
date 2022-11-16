@@ -8,6 +8,8 @@
 #ifndef VECTOR_HPP_
 #define VECTOR_HPP_
 
+#include <string>
+
 namespace Gomoku {
 
     class Vector {
@@ -31,6 +33,10 @@ namespace Gomoku {
             }
             int getY() const {
                 return _y;
+            }
+
+            std::string to_string() const {
+                return "{" + std::to_string(_x) + "; " + std::to_string(_y) + "}";
             }
 
         protected:

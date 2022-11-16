@@ -15,6 +15,10 @@ include src/Utils/Makefile
 # HPP : INCLUDES += <PATH IA HPP>
 #
 
+IA_CPP_SOURCES += src/IaTest/IaTest.cpp
+INCLUDES += -I src/IaTest/
+
+
 .PHONY: all fclean clean re
 
 all:	$(BIN_NAME)
@@ -28,5 +32,5 @@ clean:
 re: fclean all
 
 $(BIN_NAME):	$(OBJ_SRC)
-	@g++ -o $(BIN_NAME) $(OBJ_SRC) $(INCLUDES) $(LIBS)
+	@g++ $(FLAGS) -o $(BIN_NAME) $(OBJ_SRC) $(INCLUDES) $(LIBS)
 
