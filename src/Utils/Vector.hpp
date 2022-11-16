@@ -19,6 +19,9 @@ namespace Gomoku {
                 _x = x;
                 _y = y;
             }
+            Vector(Vector const& vec) {
+                *this = vec;
+            }
             ~Vector() {}
 
             void setX(int x) {
@@ -37,6 +40,12 @@ namespace Gomoku {
 
             std::string to_string() const {
                 return "{" + std::to_string(_x) + "; " + std::to_string(_y) + "}";
+            }
+
+            Vector &operator=(Vector const& vec) {
+                _x = vec.getX();
+                _y = vec.getY();
+                return *this;
             }
 
         protected:

@@ -55,6 +55,10 @@ void Gomoku::Game::__initCommands() {
         std::stringstream ss;
         ss << args[0];
         ss >> val;
+        if (val <= 0) {
+            Communication::sendError("The parameter must be higher than 0");
+            return;
+        }
         getIA()->startIA(val);
     }));
     _commands.insert(std::pair<std::string, std::function<void (std::vector<std::string>)>>("TURN", [this](std::vector<std::string> args) {
@@ -108,6 +112,10 @@ void Gomoku::Game::__initCommands() {
     _commands.insert(std::pair<std::string, std::function<void (std::vector<std::string>)>>("BOARD", [this](std::vector<std::string> args) {
         if (args.size() > 0) {
             Communication::sendError("BOARD do not have any arguments");
+            return;
+        }
+        if (!__canPlay()) {
+            Communication::sendError("No one can play in this game");
             return;
         }
         std::vector<Vector> p1;
@@ -169,6 +177,7 @@ void Gomoku::Game::__initCommands() {
     }));
     _commands.insert(std::pair<std::string, std::function<void (std::vector<std::string>)>>("END", [this](std::vector<std::string> args) {
         getIA()->stopAll();
+        _running = false;
     }));
     _commands.insert(std::pair<std::string, std::function<void (std::vector<std::string>)>>("ABOUT", [this](std::vector<std::string> args) {
         Communication::sendAbout(getIA()->getAbout());
