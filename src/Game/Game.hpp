@@ -16,9 +16,7 @@
 namespace Gomoku {
     class Game {
         public:
-            Game() {
-                _com = std::make_shared<Communication>();
-            }
+            Game() {}
             ~Game() {}
 
             void start();
