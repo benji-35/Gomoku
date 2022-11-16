@@ -43,24 +43,6 @@ namespace Gomoku {
 
             bool __canPlay();
 
-            std::string __readConsole();
-
-            std::vector<std::string> splitString(std::string str, std::string separator) {
-                std::vector<std::string> result;
-                std::size_t lastPos = 0;
-                std::size_t pos = 0;
-                std::string wordGot = "";
-
-                while((pos = str.find(separator, pos)) != std::string::npos) {
-                    wordGot = str.substr(lastPos, pos - lastPos);
-                    result.push_back(wordGot);
-                    pos++;
-                    lastPos = pos;
-                }
-                result.push_back(str.substr(lastPos, pos - lastPos)); // Last word
-
-                return result;
-            }
     };
 }
 

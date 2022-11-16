@@ -9,6 +9,8 @@
 #define COMMUNICATION_HPP_
 
 #include <iostream>
+#include <vector>
+#include <string>
 
 namespace Gomoku {
 
@@ -45,6 +47,33 @@ namespace Gomoku {
 
             static bool sendAbout(std::string about) {
                 return send("CONNECT_MESSAGES", about);
+            }
+
+            static std::vector<std::string> readManager() {
+                std::vector<std::string> result;
+                std::string tmpLine = "";
+                std::getline(std::cin, tmpLine);
+
+                if (tmpLine == "")
+                    return result;
+                return splitString(tmpLine, " ");
+            }
+
+            static std::vector<std::string> splitString(std::string str, std::string separator) {
+                std::vector<std::string> result;
+                std::size_t lastPos = 0;
+                std::size_t pos = 0;
+                std::string wordGot = "";
+
+                while((pos = str.find(separator, pos)) != std::string::npos) {
+                    wordGot = str.substr(lastPos, pos - lastPos);
+                    result.push_back(wordGot);
+                    pos++;
+                    lastPos = pos;
+                }
+                result.push_back(str.substr(lastPos, pos - lastPos)); // Last word
+
+                return result;
             }
 
         protected:

@@ -24,10 +24,7 @@ void Gomoku::Game::start() {
 }
 
 void Gomoku::Game::readCommand() {
-    std::string cmd = __readConsole();
-    if (cmd == "")
-        return;
-    std::vector<std::string> cmds = splitString(cmd, " ");
+    std::vector<std::string> cmds = Communication::readManager();
     std::vector<std::string> args;
     for (std::size_t i = 1; i < cmds.size(); i++) {
         args.push_back(cmds[i]);
@@ -40,13 +37,6 @@ void Gomoku::Game::readCommand() {
     } else {
         it->second(args);
     }
-}
-
-std::string Gomoku::Game::__readConsole() {
-    std::string cmd = "";
-    std::getline(std::cin, cmd);
-
-    return cmd;
 }
 
 bool Gomoku::Game::__canPlay() {
@@ -72,7 +62,7 @@ void Gomoku::Game::__initCommands() {
             Communication::sendError("You need 1 parameter to use TURN (X,Y)");
             return;
         }
-        std::vector<std::string> poses = splitString(args[0], ",");
+        std::vector<std::string> poses = Communication::splitString(args[0], ",");
         if (poses.size() != 2) {
             Communication::sendError("You need 1 parameter to use TURN (X,Y) parameter=" + args[0]);
             return;
@@ -122,40 +112,44 @@ void Gomoku::Game::__initCommands() {
         }
         std::vector<Vector> p1;
         std::vector<Vector> p2;
+        std::vector<std::string> tmpCmd;
         std::string tmpValues = "";
         while (tmpValues != "DONE") {
             tmpValues = "";
-            tmpValues = __readConsole();
-            if (tmpValues == "DONE")
-                break;
-            std::vector<std::string> splitted = splitString(tmpValues, ",");
-            if (splitted.size() == 3) {
-                    Vector pos;
-                    std::stringstream ss1;
-                    std::stringstream ss2;
-                    std::stringstream ss3;
-                    int p = -1;
-                    int x = -1;
-                    int y = -1;
+            tmpCmd = Communication::readManager();
+            if (tmpCmd.size() == 1) {
+                tmpValues = tmpCmd[0];
+                if (tmpValues == "DONE")
+                    break;
+                std::vector<std::string> splitted = Communication::splitString(tmpValues, ",");
+                if (splitted.size() == 3) {
+                        Vector pos;
+                        std::stringstream ss1;
+                        std::stringstream ss2;
+                        std::stringstream ss3;
+                        int p = -1;
+                        int x = -1;
+                        int y = -1;
 
-                    ss1 << splitted[0];
-                    ss2 << splitted[1];
-                    ss3 << splitted[2];
+                        ss1 << splitted[0];
+                        ss2 << splitted[1];
+                        ss3 << splitted[2];
 
-                    ss3 >> p;
-                    ss2 >> y;
-                    ss1 >> x;
+                        ss3 >> p;
+                        ss2 >> y;
+                        ss1 >> x;
 
-                    pos.setX(x);
-                    pos.setY(y);
+                        pos.setX(x);
+                        pos.setY(y);
 
-                if (p == 1) {
-                    p1.push_back(pos);
-                } else if (p == 2) {
-                    p2.push_back(pos);
+                    if (p == 1) {
+                        p1.push_back(pos);
+                    } else if (p == 2) {
+                        p2.push_back(pos);
+                    }
+                } else {
+                    Communication::sendDebug("Bad input got splite size: " + std::to_string(splitted.size()));
                 }
-            } else {
-                Communication::sendDebug("Bad input got splite size: " + std::to_string(splitted.size()));
             }
         }
     
