@@ -68,8 +68,14 @@ namespace Gomoku {
             bool restartIA() {
                 if (_boardSizeX == 0 || _boardSizeY == 0)
                     return false;
+                if (_debugMode)
+                    Communication::sendDebug("Clearing ia");
                 _history.clear();
+                if (_debugMode)
+                    Communication::sendDebug("Clearing create map");
                 __initBoard();
+                if (_debugMode)
+                    __debugMap();
                 return true;
             }
 
@@ -169,9 +175,19 @@ namespace Gomoku {
             }
     
             void __debugMap() {
-                for (std::size_t y = 0; y < _boardSizeY; y++) {
-                    Communication::sendDebug(_board[y]);
+                std::string line = "";
+                for (std::size_t i = 0; i < _boardSizeX + 2; i++) {
+                    if (i == 0 || i == _boardSizeX + 1) {
+                        line += "+";
+                    } else {
+                        line += "-";
+                    }
                 }
+                Communication::sendDebug(line);
+                for (std::size_t y = 0; y < _boardSizeY; y++) {
+                    Communication::sendDebug("|" + _board[y] + "|");
+                }
+                Communication::sendDebug(line);
             }
     };
 
