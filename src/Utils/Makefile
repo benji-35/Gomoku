@@ -11,7 +11,6 @@
 
 MAIN_PATH	=	src/
 
-#COM_PATH	=	$(MAIN_PATH)Communication/
 GAME_PATH	=	$(MAIN_PATH)Game/
 IA_PATH		=	$(MAIN_PATH)IA/
 UTILS_PATH	=	$(MAIN_PATH)Utils/
@@ -24,11 +23,8 @@ CPP_SOURCES	=	$(MAIN_PATH)Main.cpp
 
 GAME_CPP_SOURCES	=	$(GAME_PATH)Game.cpp
 IA_CPP_SOURCES		=
-#COM_CPP_SOURCES	=	$(COM_PATH)Communication.cpp
-#COM_CPP_SOURCES	=	$(COM_PATH)Communication.cpp
 
 CPP_SOURCES += $(GAME_CPP_SOURCES)
-#CPP_SOURCES += $(COM_CPP_SOURCES)
 
 OBJ_SRC	=	$(CPP_SOURCES:.cpp=.o)
 

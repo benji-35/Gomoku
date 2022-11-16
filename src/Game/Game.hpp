@@ -21,10 +21,6 @@ namespace Gomoku {
 
             void start();
 
-            void setBoardSize(std::size_t boardSize) {
-                _boardSize=  boardSize;
-            }
-
             void setIA(std::shared_ptr<AbstractIA> ia) {
                 _ia = ia;
             }
@@ -36,8 +32,6 @@ namespace Gomoku {
         protected:
         private:
             std::shared_ptr<AbstractIA> _ia;
-            std::vector<std::string> _board;
-            std::size_t _boardSize;
             bool _running = false;
     };
 }

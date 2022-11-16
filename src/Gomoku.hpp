@@ -8,7 +8,9 @@
 #ifndef GOMOKU_HPP_
 #define GOMOKU_HPP_
 
-#include "Communication/Communication.hpp"
+#include "IA/AbstractIA.hpp"
 #include "Game/Game.hpp"
+#include "Utils/MoveType.hpp"
+#include "Utils/Vector.hpp"
 
 #endif /* !GOMOKU_HPP_ */

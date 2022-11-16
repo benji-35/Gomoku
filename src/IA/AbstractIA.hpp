@@ -9,15 +9,17 @@
 #define IA_HPP_
 
 #include <vector>
+#include <string>
 
 #include "MoveType.hpp"
 #include "Vector.hpp"
+
 
 namespace Gomoku {
 
     class AbstractIA {
         public:
-            AbstractIA(Game &game) : _game(game) {}
+            AbstractIA() {}
             ~AbstractIA() = default;
 
             virtual Vector chooseBestMove() = 0;
@@ -49,9 +51,10 @@ namespace Gomoku {
             bool restartIA() {
                 _history.clear();
                 __initBoard();
+                return true;
             }
 
-            void startIA(std:size_t size) {
+            void startIA(std::size_t size) {
                 setBoardSize(size);
                 restartIA();
             }
@@ -77,9 +80,9 @@ namespace Gomoku {
             std::vector<std::string> _board;
             std::vector<Vector> _history;
             std::size_t _boardSize = 0;
-            char _iaChar = "x";
-            char _gameChar = "o";
-            char _emptyChar = ".";
+            char _iaChar = 'x';
+            char _gameChar = 'o';
+            char _emptyChar = '.';
 
             //create empty board
             void __initBoard() {
