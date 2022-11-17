@@ -17,10 +17,10 @@ Gomoku::IaTest::~IaTest() {
 
 Gomoku::Vector Gomoku::IaTest::chooseBestMove() {
     Vector result = getWinPosAI();
-    if (result.getX() != -1 && result.getY() != -1)
+    if (result.getX() != -1 && result.getY() != -1 && canMoveAtPos(result.getX(), result.getY()))
         return result;
     result = getWinPosPlayer();
-    if (result.getX() != -1 && result.getY() != -1)
+    if (result.getX() != -1 && result.getY() != -1 && canMoveAtPos(result.getX(), result.getY()))
         return result;
     
     int x = std::rand() % getBoardWidth();

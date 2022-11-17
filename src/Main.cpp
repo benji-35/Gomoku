@@ -6,7 +6,7 @@
 */
 
 #include "Gomoku.hpp"
-#include "IaTest.hpp"
+#include "IaTest/IaTest.hpp"
 
 int main() {
     Gomoku::Game game;

@@ -34,3 +34,5 @@
 *pbrain-gomoku-ai
 *.vs*
 *.idea
+
+*build*
