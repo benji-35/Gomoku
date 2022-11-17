@@ -175,7 +175,7 @@ namespace Gomoku {
                 result = __checkWinVertical(ref, preshot);
                 if (result.getX() != -1 && result.getY() != -1)
                     return result;
-                return Vector(-1, -1);
+                return result;
             }
     
             Vector __checkWinHorizontal(char ref, bool preshot = true) {
@@ -237,6 +237,44 @@ namespace Gomoku {
             }
 
             Vector __checkWinVertical(char ref, bool preshot = true) {
+                for (std::size_t x = 0; x < _boardSizeX; x++) {
+                    //var for first interesting char
+                    int firstPos = -1;
+                    //var for nb Empty chars
+                    int nbE = 0;
+                    //var for nb Ref chars
+                    int nbR = 0;
+                    //read board
+                    for (std::size_t y = 0; y < _boardSizeY; y++) {
+                        if (_board[y][x] == _emptyChar) {
+                            nbE++;
+                            if (firstPos == -1)
+                                firstPos = y;
+                            if (nbE == 2 && nbR == 0) {
+                                nbE--;
+                                firstPos++;
+                            }
+                        } else if (_board[y][x] == ref) {
+                            nbR++;
+                            if (firstPos == -1)
+                                firstPos = y;
+                        } else {
+                            firstPos = -1;
+                            nbR = 0;
+                            nbE = 0;
+                        }
+                        if ((nbE == 1 && nbR == 4) || (nbE == 2 && nbR == 3 && preshot)) {
+                            break;
+                        }
+                    }
+                
+                    if ((nbE == 1 && nbR == 4) || (nbE == 2 && nbR == 3 && preshot)) {
+                        for (std::size_t y = static_cast<std::size_t>(firstPos); y < _boardSizeY; y++) {
+                            if (_board[y][x] == _emptyChar)
+                                return Vector(x, y);
+                        }
+                    }
+                }
                 return Vector(-1, -1);
             }
 
