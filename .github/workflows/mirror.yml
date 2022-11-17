@@ -27,4 +27,3 @@ jobs:
           git clone git@github.com:benji-35/Gomoku.git /tmp/gomoku --bare
           git remote add epitech ${{ secrets.MIRROR_URL }}
           git push epitech --mirror -f || true
-          
