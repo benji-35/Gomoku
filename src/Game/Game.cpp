@@ -104,6 +104,10 @@ void Gomoku::Game::__initCommands() {
             Communication::sendError("IA can't play in this game");
             return;
         }
+        if (getIA()->getHistory().size() > 0) {
+            Communication::sendError("Game already begin !");
+            return;
+        }
         Vector pos = getIA()->chooseBestMove();
         if (!getIA()->setMove(pos)) {
             Communication::sendDebug("IA you can't pos at this positions: " + pos.to_string());
