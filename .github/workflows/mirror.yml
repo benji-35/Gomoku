@@ -1,0 +1,29 @@
+name: Mirroring
+
+on:
+  push:
+    branches:
+      - Prod
+  delete:
+    branches:
+      - Prod
+
+jobs:
+  epitech_mirror:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'benji-35' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Mirror
+        shell: bash
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" >> ~/.github_key
+          chmod 0600 ~/.github_key
+          eval $(ssh-agent)
+          ssh-add ~/.github_key
+          git clone git@github.com:benji-35/Gomoku.git /tmp/gomoku --bare
+          git remote add epitech ${{ secrets.MIRROR_URL }}
+          git push epitech --mirror -f || true
