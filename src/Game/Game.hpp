@@ -13,7 +13,7 @@
 #include <map>
 #include <functional>
 
-#include "AbstractIA.hpp"
+#include "IA/AbstractIA.hpp"
 
 namespace Gomoku {
     class Game {

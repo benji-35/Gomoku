@@ -11,9 +11,9 @@
 #include <vector>
 #include <string>
 
-#include "MoveType.hpp"
-#include "Vector.hpp"
-#include "Communication.hpp"
+#include "Utils/MoveType.hpp"
+#include "Utils/Vector.hpp"
+#include "Communication/Communication.hpp"
 
 namespace Gomoku {
     class Communication;
@@ -23,6 +23,14 @@ namespace Gomoku {
 
     class AbstractIA {
         public:
+
+            struct winPattern {
+                std::vector<std::string> pattern;
+                int xGap = 0;
+                int yGap = 0;
+                std::string name;
+            };
+
             AbstractIA(bool debug = false) : _debugMode(debug) {}
             AbstractIA(std::string const& iaName, std::string const& iaVersion, std::string const& iaAuthor, std::string const& iaCountry, bool debug = false) : 
                 _iaName(iaName), _iaVersion(iaVersion), _iaAuthor(iaAuthor), _iaCountry(iaCountry), _debugMode(debug) {}
@@ -130,7 +138,6 @@ namespace Gomoku {
              * @brief get win position available for IA
             */
             Vector getWinPosAI() {
-                Communication::sendDebug("Win AI calc");
                 return __getWinPos(_iaChar);
             }
 
@@ -138,7 +145,6 @@ namespace Gomoku {
              * @brief get win position available for Player
             */
             Vector getWinPosPlayer() {
-                Communication::sendDebug("Win opponent calc");
                 return __getWinPos(_gameChar, true);
             }
 
@@ -172,23 +178,17 @@ namespace Gomoku {
     
             Vector __getWinPos(char ref, bool preshot = false) {
                 if (preshot) {
-                    Communication::sendDebug("Calc preshots");
-                    /*
-                        checkSpecificsPattern does not working
-
                     Vector res = __checkSpecificsPattern(ref);
+
                     if (res.getX() != -1 && res.getY() != -1)
-                        return res;*/
+                        return res;
                 }
-                Communication::sendDebug("Calc hor");
                 Vector result(__checkWinHorizontal(ref, preshot));
                 if (result.getX() != -1 && result.getY() != -1)
                     return result;
-                Communication::sendDebug("Calc vert");
                 result = __checkWinVertical(ref, preshot);
                 if (result.getX() != -1 && result.getY() != -1)
                     return result;
-                Communication::sendDebug("No win");
                 return result;
             }
     
@@ -314,6 +314,8 @@ namespace Gomoku {
 
             Vector __checkSpecificsPattern(char ref) {
                 //this function is call only with preshot active
+                std::vector<winPattern> patterns;
+
                 {
                     /**
                      * Square Empty Middle :
@@ -322,8 +324,6 @@ namespace Gomoku {
                      * .XXX.
                      * here we want the middle point
                     */
-                    std::vector<std::string> _squareEmptyMiddle;
-
                     std::string l1;
                     std::string l2;
                     std::string l3;
@@ -332,24 +332,31 @@ namespace Gomoku {
                     l2 = ref + _emptyChar + ref;
                     l3 = l1;
 
-                    _squareEmptyMiddle.push_back(l1);
-                    _squareEmptyMiddle.push_back(l2);
-                    _squareEmptyMiddle.push_back(l3);
+                    winPattern nPattern;
+                    nPattern.xGap = 1;
+                    nPattern.yGap = 1;
+                    nPattern.pattern.push_back(l1);
+                    nPattern.pattern.push_back(l2);
+                    nPattern.pattern.push_back(l3);
+                    nPattern.name = "Ininit Square";
 
-                    Vector result = findPattern(_squareEmptyMiddle);
-                    if (result.getX() != 1 && result.getY() != 1) {
-                        // here result give top left corner pattern pos
-                        // we want middle so let's do some calculations
-                        result.setX(result.getX() + 1);
-                        result.setY(result.getY() + 1);
+                    patterns.push_back(nPattern);
+                }
+
+                for (std::size_t i = 0; i < patterns.size(); i++) {
+                    auto pRes = findPattern(patterns[i].pattern);
+                    if (pRes.getX() != -1 && pRes.getY() != -1) {
+                        pRes.setX(pRes.getX() + patterns[i].xGap);
+                        pRes.setY(pRes.getY() + patterns[i].yGap);
+                        Communication::sendDebug("Pattern found: " + patterns[i].name);
+                        return pRes;
                     }
-                    return result;
                 }
                 return Vector(-1, -1);
             }
 
             Vector findPattern(std::vector<std::string> pattern) {
-                Vector result(-1, -1);
+                Vector result;
 
                 int yVerrified = 0;
                 int yRes = -1;
@@ -357,7 +364,7 @@ namespace Gomoku {
 
                 for (std::size_t y = 0; y < _boardSizeY; y++) {
                     std::size_t xF = findLinePattern(_board[y], pattern[yVerrified]);
-                    if (xF != _board[y].size()) {
+                    if (xF < _board[y].size()) {
                         yVerrified++;
                         yRes = y;
                         xRes = static_cast<int>(xF);
@@ -371,9 +378,10 @@ namespace Gomoku {
                     }
                 }
 
-                if (static_cast<std::size_t>(yVerrified) != pattern.size())
-                    return result;
-                if (yRes != -1 && xRes != -1) {
+                if (static_cast<std::size_t>(yVerrified) != pattern.size()) {
+                    result.setX(-1);
+                    result.setY(-1);
+                } else {
                     result.setX(xRes);
                     result.setY(yRes);
                     Communication::sendDebug("Find pattern at: " + result.to_string());

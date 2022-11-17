@@ -8,7 +8,7 @@
 #include "Game.hpp"
 #include <iostream>
 #include <sstream>
-#include "Vector.hpp"
+#include "Utils/Vector.hpp"
 
 void Gomoku::Game::start() {
     if (_ia.use_count() == 0) {
