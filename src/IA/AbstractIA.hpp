@@ -130,6 +130,7 @@ namespace Gomoku {
              * @brief get win position available for IA
             */
             Vector getWinPosAI() {
+                Communication::sendDebug("Win AI calc");
                 return __getWinPos(_iaChar);
             }
 
@@ -137,6 +138,7 @@ namespace Gomoku {
              * @brief get win position available for Player
             */
             Vector getWinPosPlayer() {
+                Communication::sendDebug("Win opponent calc");
                 return __getWinPos(_gameChar, true);
             }
 
@@ -169,12 +171,24 @@ namespace Gomoku {
             }
     
             Vector __getWinPos(char ref, bool preshot = false) {
+                if (preshot) {
+                    Communication::sendDebug("Calc preshots");
+                    /*
+                        checkSpecificsPattern does not working
+
+                    Vector res = __checkSpecificsPattern(ref);
+                    if (res.getX() != -1 && res.getY() != -1)
+                        return res;*/
+                }
+                Communication::sendDebug("Calc hor");
                 Vector result(__checkWinHorizontal(ref, preshot));
                 if (result.getX() != -1 && result.getY() != -1)
                     return result;
+                Communication::sendDebug("Calc vert");
                 result = __checkWinVertical(ref, preshot);
                 if (result.getX() != -1 && result.getY() != -1)
                     return result;
+                Communication::sendDebug("No win");
                 return result;
             }
     
@@ -197,6 +211,10 @@ namespace Gomoku {
                             if (_found == -1) {
                                 _found = static_cast<int>(x);
                             }
+                        } else {
+                            _found = -1;
+                            refE = 0;
+                            refF = 0;
                         }
                         //check refresh selection
                         if (refE > 2) {
@@ -292,6 +310,83 @@ namespace Gomoku {
                     Communication::sendDebug("|" + _board[y] + "|");
                 }
                 Communication::sendDebug(line);
+            }
+
+            Vector __checkSpecificsPattern(char ref) {
+                //this function is call only with preshot active
+                {
+                    /**
+                     * Square Empty Middle :
+                     * .XXX.
+                     * .X.X.
+                     * .XXX.
+                     * here we want the middle point
+                    */
+                    std::vector<std::string> _squareEmptyMiddle;
+
+                    std::string l1;
+                    std::string l2;
+                    std::string l3;
+
+                    l1 = ref + ref + ref;
+                    l2 = ref + _emptyChar + ref;
+                    l3 = l1;
+
+                    _squareEmptyMiddle.push_back(l1);
+                    _squareEmptyMiddle.push_back(l2);
+                    _squareEmptyMiddle.push_back(l3);
+
+                    Vector result = findPattern(_squareEmptyMiddle);
+                    if (result.getX() != 1 && result.getY() != 1) {
+                        // here result give top left corner pattern pos
+                        // we want middle so let's do some calculations
+                        result.setX(result.getX() + 1);
+                        result.setY(result.getY() + 1);
+                    }
+                    return result;
+                }
+                return Vector(-1, -1);
+            }
+
+            Vector findPattern(std::vector<std::string> pattern) {
+                Vector result(-1, -1);
+
+                int yVerrified = 0;
+                int yRes = -1;
+                int xRes = -1;
+
+                for (std::size_t y = 0; y < _boardSizeY; y++) {
+                    std::size_t xF = findLinePattern(_board[y], pattern[yVerrified]);
+                    if (xF != _board[y].size()) {
+                        yVerrified++;
+                        yRes = y;
+                        xRes = static_cast<int>(xF);
+                    } else {
+                        yRes = -1;
+                        xRes = -1;
+                        yVerrified = 0;
+                    }
+                    if (static_cast<std::size_t>(yVerrified) == pattern.size()) {
+                        break;
+                    }
+                }
+
+                if (static_cast<std::size_t>(yVerrified) != pattern.size())
+                    return result;
+                if (yRes != -1 && xRes != -1) {
+                    result.setX(xRes);
+                    result.setY(yRes);
+                    Communication::sendDebug("Find pattern at: " + result.to_string());
+                }
+                return result;
+            }
+
+            std::size_t findLinePattern(std::string line, std::string pattern) {
+                auto res = line.find(pattern);
+
+                if (res == std::string::npos)
+                    return line.size();
+                return res;
             }
     };
 
