@@ -137,7 +137,7 @@ namespace Gomoku {
              * @brief get win position available for Player
             */
             Vector getWinPosPlayer() {
-                return __getWinPos(_gameChar);
+                return __getWinPos(_gameChar, true);
             }
 
         private:
@@ -168,12 +168,78 @@ namespace Gomoku {
                 }
             }
     
-            Vector __getWinPos(char ref) {
-                Vector result(-1, -1);
-
-                return result;
+            Vector __getWinPos(char ref, bool preshot = false) {
+                Vector result(__checkWinHorizontal(ref, preshot));
+                if (result.getX() != -1 && result.getY() != -1)
+                    return result;
+                result = __checkWinVertical(ref, preshot);
+                if (result.getX() != -1 && result.getY() != -1)
+                    return result;
+                return Vector(-1, -1);
             }
     
+            Vector __checkWinHorizontal(char ref, bool preshot = true) {
+                for (std::size_t y = 0; y < _board.size(); y++) {
+                    //ref place
+                    int refF = 0;
+                    //empty place
+                    int refE = 0;
+                    //first char found
+                    int _found = -1;
+                    for (std::size_t x = 0; x < _board[y].size(); x++) {
+                        if (_board[y][x] == ref) {
+                            refF++;
+                            if (_found == -1) {
+                                _found = static_cast<int>(x);
+                            }
+                        } else if (_board[y][x] == _emptyChar) {
+                            refE++;
+                            if (_found == -1) {
+                                _found = static_cast<int>(x);
+                            }
+                        }
+                        //check refresh selection
+                        if (refE > 2) {
+                            refF = 0;
+                            refE = 0;
+                            _found = -1;
+                        } else if (refE == 2 && refF == 0) {
+                            refF = 0;
+                            refE = 1;
+                            _found++;
+                        }
+                        //check winning positions
+                        if ((refF == 4 && refE == 1) || (refF == 3 && refE == 2 && preshot)) {
+                            break;
+                        }
+                    }
+                    if ((refF == 4 && refE == 1) || (refF == 3 && refE == 2 && preshot)) {
+                        //check position to give
+                        int posAvailable = -1;
+                        int firstRef = -1;
+                        for (std::size_t x = 0; x < _board[y].size(); x++) {
+                            if (_board[y][x] == ref && firstRef == -1) {
+                                firstRef = x;
+                                if (x > 0 && _board[y][firstRef - 1] == _emptyChar) {
+                                    posAvailable = firstRef - 1;
+                                    break;
+                                }
+                                break;
+                            }
+                        }
+                        if (posAvailable == -1) {
+                            return Vector(firstRef + refF, y);
+                        }
+                        return Vector(posAvailable, y);
+                    }
+                }
+                return Vector(-1, -1);
+            }
+
+            Vector __checkWinVertical(char ref, bool preshot = true) {
+                return Vector(-1, -1);
+            }
+
             void __debugMap() {
                 std::string line = "";
                 for (std::size_t i = 0; i < _boardSizeX + 2; i++) {
