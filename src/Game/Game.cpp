@@ -60,6 +60,7 @@ void Gomoku::Game::__initCommands() {
             return;
         }
         getIA()->startIA(val);
+        Communication::sendOK();
     }));
     _commands.insert(std::pair<std::string, std::function<void (std::vector<std::string>)>>("TURN", [this](std::vector<std::string> args) {
         if (args.size() != 1) {
@@ -174,6 +175,10 @@ void Gomoku::Game::__initCommands() {
             if (!getIA()->setMove(p2[i])) {
                 Communication::sendDebug("p2 board " + p2[i].to_string() + " can't be put");
             }
+        }
+        Vector pos = getIA()->chooseBestMove();
+        if (!getIA()->setMove(pos)) {
+            Communication::sendDebug("IA you can't pos at this positions: " + pos.to_string());
         }
     }));
     _commands.insert(std::pair<std::string, std::function<void (std::vector<std::string>)>>("INFO", [this](std::vector<std::string> args) {
