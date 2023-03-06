@@ -155,9 +155,9 @@ void Gomoku::Game::__initCommands() {
                         pos.setX(x);
                         pos.setY(y);
 
-                    if (p == 1) {
+                    if (p == 2) {
                         p1.push_back(pos);
-                    } else if (p == 2) {
+                    } else if (p == 1) {
                         p2.push_back(pos);
                     }
                 } else {
