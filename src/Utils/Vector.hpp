@@ -14,7 +14,7 @@ namespace Gomoku {
 
     class Vector {
         public:
-            Vector() {}
+            Vector() : _x(0), _y(0) {}
             Vector(int x, int y) {
                 _x = x;
                 _y = y;
@@ -45,6 +45,50 @@ namespace Gomoku {
             Vector &operator=(Vector const& vec) {
                 _x = vec.getX();
                 _y = vec.getY();
+                return *this;
+            }
+
+            bool operator==(Vector const& vec) const {
+                return _x == vec.getX() && _y == vec.getY();
+            }
+
+            bool operator!=(Vector const& vec) const {
+                return !(vec == *this);
+            }
+
+            bool operator<(Vector const& vec) const {
+                return _x < vec.getX() && _y < vec.getY();
+            }
+
+            bool operator>(Vector const& vec) const {
+                return _x > vec.getX() && _y > vec.getY();
+            }
+
+            bool operator<=(Vector const& vec) const {
+                return _x <= vec.getX() && _y <= vec.getY();
+            }
+
+            bool operator>=(Vector const& vec) const {
+                return _x >= vec.getX() && _y >= vec.getY();
+            }
+
+            Vector operator+(Vector const& vec) const {
+                return Vector(_x + vec.getX(), _y + vec.getY());
+            }
+
+            Vector operator-(Vector const& vec) const {
+                return Vector(_x - vec.getX(), _y - vec.getY());
+            }
+
+            Vector &operator+=(Vector const& vec) {
+                _x += vec.getX();
+                _y += vec.getY();
+                return *this;
+            }
+
+            Vector &operator-=(Vector const& vec) {
+                _x -= vec.getX();
+                _y -= vec.getY();
                 return *this;
             }
 

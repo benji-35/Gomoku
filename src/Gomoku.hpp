@@ -12,6 +12,7 @@
 #include "Game/Game.hpp"
 #include "Utils/MoveType.hpp"
 #include "Utils/Vector.hpp"
+#include "Utils/Clock.hpp"
 #include "Communication/Communication.hpp"
 
 #endif /* !GOMOKU_HPP_ */

@@ -36,3 +36,5 @@
 *.idea
 
 *build*
+*.log
+*unit_tests

@@ -167,12 +167,12 @@ void Gomoku::Game::__initCommands() {
         }
     
         for (std::size_t i = 0; i < p1.size(); i++) {
-            if (!getIA()->setMove(p1[i], MoveType::GAME_MOVE)) {
+            if (!getIA()->setMove(p1[i], MoveType::GAME_MOVE, true)) {
                 Communication::sendDebug("p1 board " + p1[i].to_string() + " can't be put");
             }
         }
         for (std::size_t i = 0; i < p2.size(); i++) {
-            if (!getIA()->setMove(p2[i])) {
+            if (!getIA()->setMove(p2[i], IA_MOVE, true)) {
                 Communication::sendDebug("p2 board " + p2[i].to_string() + " can't be put");
             }
         }

@@ -6,11 +6,13 @@
 */
 
 #include "Gomoku.hpp"
-#include "IaTest/IaTest.hpp"
+#include "BasicAI/BasicAI.hpp"
+#include "BestMinMax/BestMinMax.hpp"
+#include "BenjiAI/BenjiAI.hpp"
 
 int main() {
     Gomoku::Game game;
-    std::shared_ptr<Gomoku::IaTest> nIA = std::make_shared<Gomoku::IaTest>();
+    std::shared_ptr<Gomoku::BenjiAI> nIA = std::make_shared<Gomoku::BenjiAI>();
 
     game.setIA(nIA);
     game.start();

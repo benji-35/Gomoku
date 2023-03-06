@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "GomokuVersion.hpp"
 
 namespace Gomoku {
 
@@ -38,7 +39,7 @@ namespace Gomoku {
             }
 
             static bool sendMove(int x, int y) {
-                return send("CONNECT_MESSAGES", "" + std::to_string(x) + " " + std::to_string(y));
+                return send("CONNECT_MESSAGES", "" + std::to_string(x) + "," + std::to_string(y));
             }
 
             static bool sendOK() {

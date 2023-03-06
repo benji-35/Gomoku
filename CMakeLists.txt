@@ -21,8 +21,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
 set(CMAKE_CXX_STANDARD 17)
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES src/*.cpp AIs/*.cpp)
 
 include_directories(src/)
+include_directories(AIs/)
 
 add_executable(${EXE_NAME} ${SOURCES} ${HEADERS})

@@ -10,8 +10,9 @@
 
 namespace Gomoku {
     enum MoveType {
+        NONE = -1,
         IA_MOVE = 0,
-        GAME_MOVE
+        GAME_MOVE,
     };
 }
 

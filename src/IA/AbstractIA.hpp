@@ -24,11 +24,9 @@ namespace Gomoku {
     class AbstractIA {
         public:
 
-            struct winPattern {
-                std::vector<std::string> pattern;
-                int xGap = 0;
-                int yGap = 0;
-                std::string name;
+            struct PosHistory {
+                Vector pos = Vector(-1, -1);
+                MoveType player = MoveType::NONE;
             };
 
             AbstractIA(bool debug = false) : _debugMode(debug) {}
@@ -38,26 +36,25 @@ namespace Gomoku {
 
             virtual Vector chooseBestMove() = 0;
 
-            void setBoardSize(std::size_t size) {
+            void setBoardSize(int size) {
                 _boardSizeX = size;
                 _boardSizeY = size;
             }
 
-            void setBoardSize(std::size_t sizeX, std::size_t sizeY) {
+            void setBoardSize(int sizeX, int sizeY) {
                 _boardSizeX = sizeX;
                 _boardSizeY = sizeY;
             }
 
-            bool setMove(Vector pos, MoveType moveType = MoveType::IA_MOVE) {
+            bool setMove(Vector pos, MoveType moveType = MoveType::IA_MOVE, bool board = false) {
                 if (!canMoveAtPos(pos.getX(), pos.getY()))
                     return false;
-                if (moveType == MoveType::GAME_MOVE) {
-                    _board[pos.getY()][pos.getX()] = _gameChar;
-                } else {
-                    _board[pos.getY()][pos.getX()] = _iaChar;
+                if (!board && moveType == MoveType::IA_MOVE)
                     Communication::sendMove(pos.getX(), pos.getY());
-                }
-                _history.push_back(pos);
+                PosHistory hist;
+                hist.pos = pos;
+                hist.player = moveType;
+                _history.push_back(hist);
                 if (_debugMode) {
                     __debugMap();
                 }
@@ -67,8 +64,6 @@ namespace Gomoku {
             bool backMove() {
                 if (_history.size() == 0)
                     return false;
-                Vector last = _history[_history.size() - 1];
-                _board[last.getY()][last.getX()] = _emptyChar;
                 _history.pop_back();
                 return true;
             }
@@ -87,25 +82,9 @@ namespace Gomoku {
                 return true;
             }
 
-            void startIA(std::size_t size) {
+            void startIA(int size) {
                 setBoardSize(size);
                 restartIA();
-            }
-
-            std::vector<std::string> getBoard() const {
-                return _board;
-            }
-
-            std::vector<Vector> getHistory() const {
-                return _history;
-            }
-
-            std::size_t getBoardWidth() const {
-                return _boardSizeX;
-            }
-
-            std::size_t getBoardHeight() const {
-                return _boardSizeY;
             }
 
             std::string getAbout() const {
@@ -113,8 +92,19 @@ namespace Gomoku {
             }
 
             void stopAll() {
-                _board.clear();
                 _history.clear();
+            }
+
+            int getBoardWidth() const {
+                return _boardSizeX;
+            }
+
+            int getBoardHeight() const {
+                return _boardSizeY;
+            }
+
+            std::vector<PosHistory> getHistory() const {
+                return _history;
             }
 
         protected:
@@ -126,33 +116,93 @@ namespace Gomoku {
                 return _gameChar;
             }
 
+            char getEmptyChar() const {
+                return _emptyChar;
+            }
+
             bool canMoveAtPos(int x, int y) {
-                if (y >= static_cast<int>(_boardSizeY))
+                if (y >= static_cast<int>(_boardSizeY) || y < 0)
                     return false;
-                if (x >= static_cast<int>(_boardSizeX))
+                if (x >= static_cast<int>(_boardSizeX) || x < 0)
                     return false;
-                return _board[y][x] == _emptyChar;
+                return !(posIsPlayed(x, y));
             }
 
-            /**
-             * @brief get win position available for IA
-            */
-            Vector getWinPosAI() {
-                return __getWinPos(_iaChar);
+            bool canMoveAtPos(Vector pos) {
+                return canMoveAtPos(pos.getX(), pos.getY());
             }
 
-            /**
-             * @brief get win position available for Player
-            */
-            Vector getWinPosPlayer() {
-                return __getWinPos(_gameChar, true);
+            bool posIsPlayed(Vector pos) {
+                return posIsPlayed(pos.getX(), pos.getY());
+            }
+
+            bool posIsPlayed(int x, int y) {
+                if (y >= static_cast<int>(_boardSizeY) || y < 0)
+                    return false;
+                if (x >= static_cast<int>(_boardSizeX) || x < 0)
+                    return false;
+                for (std::size_t i = 0; i < _history.size(); i++) {
+                    if (_history[i].pos.getX() == x && _history[i].pos.getY() == y)
+                        return true;
+                }
+                return false;
+            }
+
+            MoveType whoPlayedAt(int x, int y) {
+                if (!posIsPlayed(x, y))
+                    return MoveType::NONE;
+                for (std::size_t i = 0; i < _history.size(); i++) {
+                    if (_history[i].pos.getX() == x && _history[i].pos.getY() == y)
+                        return _history[i].player;
+                }
+                return MoveType::NONE;
+            }
+
+            MoveType whoPlayedAt(Vector pos) {
+                return whoPlayedAt(pos.getX(), pos.getY());
+            }
+
+            MoveType whoPlayedAt(int x, int y, std::vector<PosHistory> hist) {
+                if (hist.empty())
+                    return whoPlayedAt(x, y);
+                for (std::size_t i = 0; i < hist.size(); i++) {
+                    if (hist[i].pos.getX() == x && hist[i].pos.getY() == y)
+                        return hist[i].player;
+                }
+                return MoveType::NONE;
+            }
+
+            MoveType whoPlayedAt(Vector pos, std::vector<PosHistory> hist) {
+                return whoPlayedAt(pos.getX(), pos.getY(), hist);
+            }
+
+            std::vector<std::string> getBoard() const {
+                return getBoard(_history);
+            }
+
+            std::vector<std::string> getBoard(std::vector<PosHistory> poses) const {
+                std::vector<std::string> nBoard;
+                for (int i = 0; i < _boardSizeY; i++) {
+                    std::string line = "";
+                    for (int j = 0; j < _boardSizeX; j++) {
+                        line += _emptyChar;
+                    }
+                    nBoard.push_back(line);
+                }
+                for (std::size_t i = 0; i < poses.size(); i++) {
+                    if (poses[i].player == MoveType::GAME_MOVE && poses[i].pos.getX() < _boardSizeX && poses[i].pos.getY() < _boardSizeY && poses[i].pos.getX() >= 0 && poses[i].pos.getY() >= 0) {
+                        nBoard[poses[i].pos.getY()][poses[i].pos.getX()] = _gameChar;
+                    } else if (poses[i].pos.getX() < _boardSizeX && poses[i].pos.getY() < _boardSizeY && poses[i].pos.getX() >= 0 && poses[i].pos.getY() >= 0) {
+                        nBoard[poses[i].pos.getY()][poses[i].pos.getX()] = _iaChar;
+                    }
+                }
+                return nBoard;
             }
 
         private:
-            std::vector<std::string> _board;
-            std::vector<Vector> _history;
-            std::size_t _boardSizeX = 0;
-            std::size_t _boardSizeY = 0;
+            std::vector<PosHistory> _history;
+            int _boardSizeX = 0;
+            int _boardSizeY = 0;
             char _iaChar = 'x';
             char _gameChar = 'o';
             char _emptyChar = '.';
@@ -166,139 +216,13 @@ namespace Gomoku {
 
             //create empty board
             void __initBoard() {
-                _board.clear();
-                for (std::size_t y = 0; y < _boardSizeY; y++) {
-                    std::string line = "";
-                    for (std::size_t x = 0; x < _boardSizeX; x++) {
-                        line += _emptyChar;
-                    }
-                    _board.push_back(line);
-                }
-            }
-    
-            Vector __getWinPos(char ref, bool preshot = false) {
-                if (preshot) {
-                    Vector res = __checkSpecificsPattern(ref);
-
-                    if (res.getX() != -1 && res.getY() != -1)
-                        return res;
-                }
-                Vector result(__checkWinHorizontal(ref, preshot));
-                if (result.getX() != -1 && result.getY() != -1)
-                    return result;
-                result = __checkWinVertical(ref, preshot);
-                if (result.getX() != -1 && result.getY() != -1)
-                    return result;
-                return result;
-            }
-    
-            Vector __checkWinHorizontal(char ref, bool preshot = true) {
-                for (std::size_t y = 0; y < _board.size(); y++) {
-                    //ref place
-                    int refF = 0;
-                    //empty place
-                    int refE = 0;
-                    //first char found
-                    int _found = -1;
-                    for (std::size_t x = 0; x < _board[y].size(); x++) {
-                        if (_board[y][x] == ref) {
-                            refF++;
-                            if (_found == -1) {
-                                _found = static_cast<int>(x);
-                            }
-                        } else if (_board[y][x] == _emptyChar) {
-                            refE++;
-                            if (_found == -1) {
-                                _found = static_cast<int>(x);
-                            }
-                        } else {
-                            _found = -1;
-                            refE = 0;
-                            refF = 0;
-                        }
-                        //check refresh selection
-                        if (refE > 2) {
-                            refF = 0;
-                            refE = 0;
-                            _found = -1;
-                        } else if (refE == 2 && refF == 0) {
-                            refF = 0;
-                            refE = 1;
-                            _found++;
-                        }
-                        //check winning positions
-                        if ((refF == 4 && refE == 1) || (refF == 3 && refE == 2 && preshot)) {
-                            break;
-                        }
-                    }
-                    if ((refF == 4 && refE == 1) || (refF == 3 && refE == 2 && preshot)) {
-                        //check position to give
-                        int posAvailable = -1;
-                        int firstRef = -1;
-                        for (std::size_t x = 0; x < _board[y].size(); x++) {
-                            if (_board[y][x] == ref && firstRef == -1) {
-                                firstRef = x;
-                                if (x > 0 && _board[y][firstRef - 1] == _emptyChar) {
-                                    posAvailable = firstRef - 1;
-                                    break;
-                                }
-                                break;
-                            }
-                        }
-                        if (posAvailable == -1) {
-                            return Vector(firstRef + refF, y);
-                        }
-                        return Vector(posAvailable, y);
-                    }
-                }
-                return Vector(-1, -1);
-            }
-
-            Vector __checkWinVertical(char ref, bool preshot = true) {
-                for (std::size_t x = 0; x < _boardSizeX; x++) {
-                    //var for first interesting char
-                    int firstPos = -1;
-                    //var for nb Empty chars
-                    int nbE = 0;
-                    //var for nb Ref chars
-                    int nbR = 0;
-                    //read board
-                    for (std::size_t y = 0; y < _boardSizeY; y++) {
-                        if (_board[y][x] == _emptyChar) {
-                            nbE++;
-                            if (firstPos == -1)
-                                firstPos = y;
-                            if (nbE == 2 && nbR == 0) {
-                                nbE--;
-                                firstPos++;
-                            }
-                        } else if (_board[y][x] == ref) {
-                            nbR++;
-                            if (firstPos == -1)
-                                firstPos = y;
-                        } else {
-                            firstPos = -1;
-                            nbR = 0;
-                            nbE = 0;
-                        }
-                        if ((nbE == 1 && nbR == 4) || (nbE == 2 && nbR == 3 && preshot)) {
-                            break;
-                        }
-                    }
-                
-                    if ((nbE == 1 && nbR == 4) || (nbE == 2 && nbR == 3 && preshot)) {
-                        for (std::size_t y = static_cast<std::size_t>(firstPos); y < _boardSizeY; y++) {
-                            if (_board[y][x] == _emptyChar)
-                                return Vector(x, y);
-                        }
-                    }
-                }
-                return Vector(-1, -1);
+                _history.clear();
             }
 
             void __debugMap() {
+                auto board = getBoard();
                 std::string line = "";
-                for (std::size_t i = 0; i < _boardSizeX + 2; i++) {
+                for (int i = 0; i < _boardSizeX + 2; i++) {
                     if (i == 0 || i == _boardSizeX + 1) {
                         line += "+";
                     } else {
@@ -306,98 +230,13 @@ namespace Gomoku {
                     }
                 }
                 Communication::sendDebug(line);
-                for (std::size_t y = 0; y < _boardSizeY; y++) {
-                    Communication::sendDebug("|" + _board[y] + "|");
+                for (int y = 0; y < _boardSizeY; y++) {
+                    Communication::sendDebug("|" + board[y] + "|");
                 }
                 Communication::sendDebug(line);
             }
 
-            Vector __checkSpecificsPattern(char ref) {
-                //this function is call only with preshot active
-                std::vector<winPattern> patterns;
-
-                {
-                    /**
-                     * Square Empty Middle :
-                     * .XXX.
-                     * .X.X.
-                     * .XXX.
-                     * here we want the middle point
-                    */
-                    std::string l1;
-                    std::string l2;
-                    std::string l3;
-
-                    l1 = ref + ref + ref;
-                    l2 = ref + _emptyChar + ref;
-                    l3 = l1;
-
-                    winPattern nPattern;
-                    nPattern.xGap = 1;
-                    nPattern.yGap = 1;
-                    nPattern.pattern.push_back(l1);
-                    nPattern.pattern.push_back(l2);
-                    nPattern.pattern.push_back(l3);
-                    nPattern.name = "Ininit Square";
-
-                    patterns.push_back(nPattern);
-                }
-
-                for (std::size_t i = 0; i < patterns.size(); i++) {
-                    auto pRes = findPattern(patterns[i].pattern);
-                    if (pRes.getX() != -1 && pRes.getY() != -1) {
-                        pRes.setX(pRes.getX() + patterns[i].xGap);
-                        pRes.setY(pRes.getY() + patterns[i].yGap);
-                        Communication::sendDebug("Pattern found: " + patterns[i].name);
-                        return pRes;
-                    }
-                }
-                return Vector(-1, -1);
-            }
-
-            Vector findPattern(std::vector<std::string> pattern) {
-                Vector result;
-
-                int yVerrified = 0;
-                int yRes = -1;
-                int xRes = -1;
-
-                for (std::size_t y = 0; y < _boardSizeY; y++) {
-                    std::size_t xF = findLinePattern(_board[y], pattern[yVerrified]);
-                    if (xF < _board[y].size()) {
-                        yVerrified++;
-                        yRes = y;
-                        xRes = static_cast<int>(xF);
-                    } else {
-                        yRes = -1;
-                        xRes = -1;
-                        yVerrified = 0;
-                    }
-                    if (static_cast<std::size_t>(yVerrified) == pattern.size()) {
-                        break;
-                    }
-                }
-
-                if (static_cast<std::size_t>(yVerrified) != pattern.size()) {
-                    result.setX(-1);
-                    result.setY(-1);
-                } else {
-                    result.setX(xRes);
-                    result.setY(yRes);
-                    Communication::sendDebug("Find pattern at: " + result.to_string());
-                }
-                return result;
-            }
-
-            std::size_t findLinePattern(std::string line, std::string pattern) {
-                auto res = line.find(pattern);
-
-                if (res == std::string::npos)
-                    return line.size();
-                return res;
-            }
     };
-
 }
 
 #endif /* !IA_HPP_ */
